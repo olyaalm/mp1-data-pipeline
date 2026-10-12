@@ -8,6 +8,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
+# Remove exact duplicate records while preserving the first occurrence.
 def remove_duplicates(df):
     """Remove duplicate rows."""
     cleaned = df.drop_duplicates()
@@ -17,10 +18,12 @@ def remove_duplicates(df):
 
 def handle_missing(df, axis="rows"):
     """Drop rows or columns containing missing values."""
+    # Validate the requested direction before passing it to pandas.
     if axis not in {"rows", "columns"}:
         logger.error("Unsupported missing-value axis: %s", axis)
         raise ValueError(f"Unsupported missing-value axis: {axis}")
 
+    # pandas uses axis 0 for rows and axis 1 for columns.
     cleaned = df.dropna(axis=0 if axis == "rows" else 1)
     if axis == "rows":
         removed = len(df) - len(cleaned)
@@ -32,12 +35,15 @@ def handle_missing(df, axis="rows"):
 
 def remove_outliers(df, columns, method, threshold):
     """Remove outliers from the specified numeric columns."""
+    # Only the two methods defined by the project configuration are supported.
     if method not in {"iqr", "zscore"}:
         logger.error("Unsupported outlier method: %s", method)
         raise ValueError(f"Unsupported outlier method: {method}")
 
+    # Filter a copy so the caller's DataFrame remains unchanged.
     cleaned = df.copy()
     for column in columns:
+        # A dataset may not contain every optional configured column.
         if column not in cleaned.columns:
             logger.warning("Column not found: %s", column)
             continue
@@ -47,6 +53,7 @@ def remove_outliers(df, columns, method, threshold):
 
         values = cleaned[column]
         if method == "iqr":
+            # The IQR fences identify values unusually far from the middle half.
             first_quartile = values.quantile(0.25)
             third_quartile = values.quantile(0.75)
             spread = third_quartile - first_quartile
@@ -62,6 +69,7 @@ def remove_outliers(df, columns, method, threshold):
                 int(outliers.sum()),
             )
         else:
+            # Z-scores measure distance from the mean in standard deviations.
             mean = values.mean()
             standard_deviation = values.std()
             if pd.isna(standard_deviation) or standard_deviation == 0:
@@ -88,6 +96,7 @@ def remove_outliers(df, columns, method, threshold):
 
 def process_data(df, config):
     """Apply the processing steps enabled in the configuration."""
+    # Apply enabled operations in the required order.
     settings = config["processing"]
     cleaned = df
 
@@ -112,6 +121,7 @@ def process_data(df, config):
 
 def create_cleaning_report(df_before, df_after):
     """Return a summary of the rows and columns removed during cleaning."""
+    # Compare dimensions before and after all configured cleaning steps.
     rows_before = len(df_before)
     rows_after = len(df_after)
     columns_before = len(df_before.columns)

@@ -8,11 +8,13 @@ import pandas as pd
 import yaml
 
 
+# Use this module's name in log messages to show where a load came from.
 logger = logging.getLogger(__name__)
 
 
 def load_csv(filepath):
     """Load a CSV file into a pandas DataFrame."""
+    # CSV inputs become DataFrames for the processing pipeline.
     data = pd.read_csv(filepath)
     logger.info("Loaded CSV file: %s (%s rows)", filepath, len(data))
     return data
@@ -20,6 +22,7 @@ def load_csv(filepath):
 
 def load_json(filepath):
     """Load a JSON file into a Python object."""
+    # UTF-8 supports standard text-based JSON files.
     with filepath.open(encoding="utf-8") as file:
         data = json.load(file)
     logger.info("Loaded JSON file: %s", filepath)
@@ -28,6 +31,7 @@ def load_json(filepath):
 
 def load_yaml(filepath):
     """Load a YAML file into a Python object."""
+    # safe_load parses YAML without constructing arbitrary Python objects.
     with filepath.open(encoding="utf-8") as file:
         data = yaml.safe_load(file)
     logger.info("Loaded YAML file: %s", filepath)
@@ -36,6 +40,7 @@ def load_yaml(filepath):
 
 def load_data(filepath):
     """Load a file using the loader that matches its extension."""
+    # Normalize the suffix so extension matching is case-insensitive.
     path = Path(filepath)
     extension = path.suffix.lower()
     loaders = {
@@ -44,6 +49,7 @@ def load_data(filepath):
         ".yaml": load_yaml,
     }
 
+    # Reject unsupported formats rather than silently returning bad data.
     loader = loaders.get(extension)
     if loader is None:
         logger.error("Unsupported file format: %s", extension)

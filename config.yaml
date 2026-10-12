@@ -1,13 +1,18 @@
+# Cleaning options used by data_processor.py.
 processing:
+  # Remove identical full rows before handling missing values.
   remove_duplicates: true
 
+  # Drop records that contain missing values.
   missing:
     enabled: true
     axis: "rows"
 
+  # Identify outliers only in the listed numeric columns.
   outliers:
     enabled: true
     columns:
       - Score
     method: "iqr"
+    # IQR multiplier used to set the lower and upper outlier bounds.
     threshold: 1.5
