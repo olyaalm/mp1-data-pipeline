@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 def setup_logging(verbose=False):
     """Configure pipeline logging at the requested detail level."""
-    # Verbose mode exposes DEBUG details from each pipeline module.
+    # Enabling verbose mode to expose DEBUG details from each pipeline module.
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(
         level=level,

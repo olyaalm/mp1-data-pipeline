@@ -10,7 +10,9 @@ python pipeline.py --input fixtures/sample_data.csv --output output/clean.csv --
 
 ## Example Output
 
-```text
-Cleaning report:
-{'rows_before': 3, 'rows_after': 3, 'rows_removed': 0, 'columns_before': 3, 'columns_after': 3, 'columns_removed': 0}
+```csv
+product,quantity,price
+Widget,10,25.5
+Gadget,5,19.99
+Thing,0,12.0
 ```
