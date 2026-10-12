@@ -1,12 +1,13 @@
 # Configuring dataset checks and cleaning options for the pipeline.
 validation:
   required_columns:
-    - product
-    - quantity
-    - price
+    - record_id
+    - name
+    - rating
+    - category
+    - status
   numeric_columns:
-    - quantity
-    - price
+    - rating
 
 processing:
   # Removing exact duplicate records while preserving the first occurrence.
@@ -17,10 +18,10 @@ processing:
     enabled: true
     axis: "rows"
 
-  # Applying the IQR rule to the configured numeric field.
+  # Applying the IQR rule to the rating field.
   outliers:
     enabled: true
     columns:
-      - price
+      - rating
     method: "iqr"
     threshold: 1.5
