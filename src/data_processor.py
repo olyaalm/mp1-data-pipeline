@@ -8,7 +8,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-# Remove exact duplicate records while preserving the first occurrence.
+# Drop repeated rows while keeping one copy of each distinct row.
 def remove_duplicates(df):
     """Remove duplicate rows."""
     cleaned = df.drop_duplicates()

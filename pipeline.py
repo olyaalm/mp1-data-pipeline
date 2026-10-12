@@ -1,43 +1,22 @@
-"""
-Data Processing Pipeline - CLI Template
-
-DS 3500 - MP1
-
-Usage:
-    python pipeline.py --input data.csv --output clean.csv --config config.yaml
-"""
+"""Command-line entry point for the complete MP1 data pipeline."""
 
 import argparse
 import logging
 import sys
-from pathlib import Path
 
-# Reuse the format-specific loaders and configurable cleaning steps.
-from data_loaders import load_data
-from data_processor import create_cleaning_report, process_data
-
-
-logger = logging.getLogger(__name__)
-
-
-def setup_logging(verbose=False):
-    """Configure logging for the pipeline."""
-    # Verbose mode includes detailed messages from the processing module.
-    if verbose:
-        level = logging.DEBUG
-    else:
-        level = logging.INFO
-
-    logging.basicConfig(
-        level=level,
-        format="%(asctime)s %(levelname)-8s %(name)s — %(message)s",
-        datefmt="%H:%M:%S",
-    )
+from src import (
+    create_cleaning_report,
+    load_data,
+    process_data,
+    save_data,
+    setup_logging,
+    validate_dataframe,
+    validate_input,
+)
 
 
 def parse_arguments():
     """Parse command-line arguments."""
-    # Keep file paths and verbosity under command-line control.
     parser = argparse.ArgumentParser(
         description="Data processing pipeline"
     )
@@ -50,62 +29,68 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def validate_input(filepath):
-    """Check whether the input path exists and is a file."""
-    # Reject missing paths and directories before attempting to load them.
-    if Path(filepath).is_file():
-        logger.info("Input file validated: %s", filepath)
-        return True
-
-    logger.error("Input file not found: %s", filepath)
-    return False
-
-
 def main():
     """Main pipeline function."""
     args = parse_arguments()
     setup_logging(args.verbose)
 
-    # Log the selected paths only in verbose mode.
-    logger.debug(
+    logging.getLogger(__name__).debug(
         "Arguments parsed: input=%s, config=%s, output=%s",
         args.input,
         args.config,
         args.output,
     )
 
-    # Both the dataset and its processing configuration must exist.
+    # Validate both files before asking the loaders to open them.
     input_valid = validate_input(args.input)
     config_valid = validate_input(args.config)
     if not input_valid or not config_valid:
         sys.exit(1)
 
     try:
-        # The file extension selects the appropriate loader for each input.
         data = load_data(args.input)
         config = load_data(args.config)
     except ValueError:
         sys.exit(1)
 
-    # Keep the original dimensions for the final cleaning report.
-    original_data = data.copy()
+    # Validate configured fields before running the cleaning operations.
+    validation = config["validation"]
+    rows_before_validation = len(data)
     try:
-        # Processing errors are reported by the processor and stop the run.
-        cleaned_data = process_data(data, config)
+        validated_data = validate_dataframe(
+            data,
+            required_columns=validation["required_columns"],
+            numeric_columns=validation["numeric_columns"],
+        )
+    except ValueError:
+        sys.exit(1)
+    logger = logging.getLogger(__name__)
+    logger.info(
+        "Validation complete: %s -> %s rows",
+        rows_before_validation,
+        len(validated_data),
+    )
+
+    # The cleaning report covers processing after validation has completed.
+    data_before_processing = validated_data.copy()
+    try:
+        cleaned_data = process_data(validated_data, config)
     except ValueError:
         sys.exit(1)
 
-    # Report the changes, then write the cleaned table without row indices.
-    report = create_cleaning_report(original_data, cleaned_data)
-    print(report)
+    report = create_cleaning_report(data_before_processing, cleaned_data)
     logger.info(
         "Processing complete: %s -> %s rows",
         report["rows_before"],
         report["rows_after"],
     )
 
-    cleaned_data.to_csv(args.output, index=False)
+    save_data(cleaned_data, args.output)
     logger.info("Saved cleaned data to %s", args.output)
+
+    # Print the report last so it remains easy to find after the log output.
+    print("\nCleaning report:")
+    print(report)
 
 
 if __name__ == "__main__":

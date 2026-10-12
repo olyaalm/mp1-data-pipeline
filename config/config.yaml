@@ -1,0 +1,26 @@
+# Dataset checks and cleaning options used by the pipeline.
+validation:
+  required_columns:
+    - product
+    - quantity
+    - price
+  numeric_columns:
+    - quantity
+    - price
+
+processing:
+  # Drop repeated rows while keeping one copy of each distinct row.
+  remove_duplicates: true
+
+  # Drop records with missing values before checking outliers.
+  missing:
+    enabled: true
+    axis: "rows"
+
+  # Apply the IQR rule to the configured numeric field.
+  outliers:
+    enabled: true
+    columns:
+      - price
+    method: "iqr"
+    threshold: 1.5
