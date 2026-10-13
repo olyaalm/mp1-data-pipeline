@@ -35,7 +35,11 @@ def load_yaml(filepath):
 
     # Opening the file and safely turning its YAML text into Python data
     with filepath.open(encoding="utf-8") as file:
-        data = yaml.safe_load(file)
+        try:
+            data = yaml.safe_load(file)
+        except yaml.YAMLError as error:
+            logger.error("Invalid YAML file: %s", filepath)
+            raise ValueError(f"Invalid YAML file: {filepath}") from error
     logger.info("Loaded YAML file: %s", filepath)
     return data
 

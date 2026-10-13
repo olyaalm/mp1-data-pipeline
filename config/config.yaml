@@ -19,7 +19,6 @@ processing:
   # Removing rows that match across every column and keeping the first
   remove_duplicates: true
 
-
   # Removing rows that contain any blank value
   missing:
 
@@ -28,7 +27,6 @@ processing:
 
     # Choosing to remove rows instead of columns
     axis: "rows"
-
 
   # Removing unusually low or high ratings
   outliers:

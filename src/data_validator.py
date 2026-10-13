@@ -1,6 +1,7 @@
 """Validate required columns and numeric values in tabular data."""
 
 import logging
+import math
 
 import pandas as pd
 
@@ -22,13 +23,11 @@ def validate_dataframe(df, required_columns, numeric_columns):
         logger.error(message)
         raise ValueError(message)
 
-
     # Copying the table before changing column types or removing rows
     validated = df.copy()
 
     # Counting starting rows for the validation log
     rows_before = len(validated)
-
 
     # Checking each configured numeric column
     for column in numeric_columns:
@@ -39,22 +38,21 @@ def validate_dataframe(df, required_columns, numeric_columns):
             logger.error(message)
             raise ValueError(message)
 
-
         # Marking values that cannot be read as numbers
         invalid_mask = []
 
         # Checking each non-blank value as a number
         for value in validated[column]:
             invalid = False
-
             # Trying to read every non-blank value as a number
             if pd.notna(value):
                 try:
-                    float(value)
+                    number = float(value)
                 except (TypeError, ValueError):
                     invalid = True
+                else:
+                    invalid = not math.isfinite(number)
             invalid_mask.append(invalid)
-
 
         # Counting non-numeric values and warning before removing their rows
         invalid_count = sum(invalid_mask)
@@ -64,16 +62,13 @@ def validate_dataframe(df, required_columns, numeric_columns):
                 invalid_count,
                 column,
             )
-
             # Keeping rows by position so repeated index labels remain safe
             validated = validated.iloc[
                 [not invalid for invalid in invalid_mask]
             ].copy()
 
-
         # Converting the remaining values to a numeric column
         validated[column] = pd.to_numeric(validated[column])
-
 
     # Logging the number of rows kept and removed
     logger.debug(
