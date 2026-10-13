@@ -24,4 +24,5 @@ processing:
     columns:
       - rating
     method: "iqr"
+    # IQR is the range of the middle half of ratings; 1.5 sets the outlier limit.
     threshold: 1.5
