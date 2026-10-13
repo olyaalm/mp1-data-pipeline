@@ -98,4 +98,4 @@ record_id,name,rating,category,status
 97,Record_097,,B,active
 98,Record_098,75,,inactive
 1,Record_001,67,B,active
-2,Record_002,74,C,inactive
+2,"Record_002",74,C,inactive
