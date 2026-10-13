@@ -17,6 +17,7 @@ from src import (
 
 def parse_arguments():
     """Parse command-line arguments."""
+    # These options let the same program work with different files and settings.
     parser = argparse.ArgumentParser(
         description="Data processing pipeline"
     )
@@ -41,18 +42,20 @@ def main():
         args.output,
     )
 
-    # Checking both paths first so missing-file errors are reported before loading.
+    # Check both paths first so a missing file gets a clear message before loading.
     input_valid = validate_input(args.input)
     config_valid = validate_input(args.config)
     if not input_valid or not config_valid:
         sys.exit(1)
 
     try:
+        # The file endings tell load_data whether to use the CSV or YAML loader.
         data = load_data(args.input)
         config = load_data(args.config)
     except ValueError:
         sys.exit(1)
 
+    # The config lists which columns must exist and which columns should be numbers.
     validation = config["validation"]
     rows_before_validation = len(data)
     try:
@@ -70,7 +73,7 @@ def main():
         len(validated_data),
     )
 
-    # Starting the cleaning report after validation so validation drops stay separate.
+    # Save the validated data so the report measures cleaning, not validation.
     data_before_processing = validated_data.copy()
     try:
         cleaned_data = process_data(validated_data, config)

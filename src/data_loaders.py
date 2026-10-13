@@ -1,4 +1,4 @@
-"""Load data files in supported formats."""
+"""Reading CSV, JSON, and YAML files for the pipeline."""
 
 import json
 import logging
@@ -36,7 +36,7 @@ def load_yaml(filepath):
 
 def load_data(filepath):
     """Load a file using the loader that matches its extension."""
-    # Normalizing suffix case so uppercase extensions use the same loader.
+    # Lowercase the ending so FILE.CSV and file.csv use the same loader.
     path = Path(filepath)
     extension = path.suffix.lower()
     loaders = {
@@ -45,6 +45,7 @@ def load_data(filepath):
         ".yaml": load_yaml,
     }
 
+    # Look up the matching function once, then report formats we do not support.
     loader = loaders.get(extension)
     if loader is None:
         logger.error("Unsupported file format: %s", extension)

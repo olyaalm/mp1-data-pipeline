@@ -1,6 +1,6 @@
 # MP1 Data Pipeline
 
-This command-line pipeline reads a data file and a YAML config, then saves a cleaned CSV. The loader module supports CSV, JSON, and YAML files. The validator checks required columns and converts configured numeric fields, while dropping rows that contain invalid numeric text. The processor removes duplicate rows, handles missing values, and then removes outliers. The output module creates the destination folder and saves the CSV without an index. Shared logging and file checks are in `src/utils.py`, and dataset-specific settings are in `config/config.yaml`. The example uses the course sample data and shows the resulting cleaning report.
+This command-line program reads a data file, checks and cleans its rows, and saves the result as a CSV. `pipeline.py` connects each step and reads the input, config, output, and verbose options from the command line. `src/data_loaders.py` opens CSV, JSON, and YAML files, while `src/data_validator.py` checks column names and numeric values. `src/data_processor.py` removes duplicate rows, handles missing values, and filters outliers using the choices in the config. `src/data_output.py` creates the output folder and writes the cleaned table, and `src/utils.py` handles logging and checks that input files exist. `config/config.yaml` contains the columns and cleaning settings for the course sample, and `fixtures/` holds the input files used for testing. The example below shows the command and results for `fixtures/sample_data.csv`.
 
 ## Run the Pipeline
 

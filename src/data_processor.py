@@ -8,7 +8,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-# Treating rows as duplicates only when every column matches, keeping the first.
+# Rows count as duplicates when every value matches; keep the first copy.
 def remove_duplicates(df):
     """Remove duplicate rows."""
     cleaned = df.drop_duplicates()
@@ -37,7 +37,7 @@ def remove_outliers(df, columns, method, threshold):
         logger.error("Unsupported outlier method: %s", method)
         raise ValueError(f"Unsupported outlier method: {method}")
 
-    # Filtering a copy so this helper never changes the caller's DataFrame.
+    # Work on a copy so calling this function does not change the original table.
     cleaned = df.copy()
     for column in columns:
         if column not in cleaned.columns:
@@ -49,7 +49,8 @@ def remove_outliers(df, columns, method, threshold):
 
         values = cleaned[column]
         if method == "iqr":
-            # Expanding the middle 50% by threshold times IQR to set the limits.
+            # IQR measures the middle half of the values; the threshold sets how
+            # far beyond that range a value can be before it is removed.
             first_quartile = values.quantile(0.25)
             third_quartile = values.quantile(0.75)
             spread = third_quartile - first_quartile
@@ -68,7 +69,7 @@ def remove_outliers(df, columns, method, threshold):
             mean = values.mean()
             standard_deviation = values.std()
             if pd.isna(standard_deviation) or standard_deviation == 0:
-                # Skipping z-scores because a constant column has zero spread.
+                # A constant column has no spread, so it cannot have z-score outliers.
                 outliers = pd.Series(False, index=cleaned.index)
             else:
                 outliers = ((values - mean).abs() / standard_deviation) > threshold
@@ -92,7 +93,8 @@ def remove_outliers(df, columns, method, threshold):
 
 def process_data(df, config):
     """Apply the processing steps enabled in the configuration."""
-    # Removing missing rows before calculating outlier bounds on the data.
+    # Clean in this order: duplicates, missing values, then outliers. Removing
+    # missing rows first keeps them from affecting the outlier calculations.
     settings = config["processing"]
     cleaned = df
 

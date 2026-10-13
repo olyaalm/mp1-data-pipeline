@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 def validate_dataframe(df, required_columns, numeric_columns):
     """Return a copy containing the required columns and valid numeric data."""
+    # Stop early when required headings are absent; later steps rely on them.
     missing_columns = [
         column for column in required_columns if column not in df.columns
     ]
@@ -27,7 +28,7 @@ def validate_dataframe(df, required_columns, numeric_columns):
             logger.error(message)
             raise ValueError(message)
 
-        # Leaving blanks as NaN so the configured missing-value step handles them.
+        # Blank cells are missing data, not bad numbers; the cleaning step handles them.
         invalid_mask = []
         for value in validated[column]:
             invalid = False
@@ -45,7 +46,8 @@ def validate_dataframe(df, required_columns, numeric_columns):
                 invalid_count,
                 column,
             )
-            # Filtering by position keeps repeated index labels unambiguous.
+            # Use row positions so repeated DataFrame index labels cannot select
+            # the wrong rows when invalid numeric values are removed.
             validated = validated.iloc[
                 [not invalid for invalid in invalid_mask]
             ].copy()
