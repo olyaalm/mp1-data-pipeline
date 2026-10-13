@@ -1,28 +1,36 @@
-# Configuring dataset checks and cleaning options for the pipeline.
+# Choosing the checks and cleaning steps for this dataset
 validation:
+  # Requiring these column names in the input file
   required_columns:
     - record_id
     - name
     - rating
     - category
     - status
+  # Converting rating values to numbers during validation
   numeric_columns:
     - rating
 
 processing:
-  # Removing exact duplicate records while preserving the first occurrence.
+  # Choosing which cleaning steps to run
+  # Removing rows that match across every column and keeping the first
   remove_duplicates: true
 
-  # Removing records with missing values before checking outliers.
+  # Removing rows that contain any blank value
   missing:
+    # Turning missing-value removal on
     enabled: true
+    # Choosing to remove rows instead of columns
     axis: "rows"
 
-  # Applying the IQR rule to the rating field.
+  # Removing unusually low or high ratings
   outliers:
+    # Turning outlier removal on
     enabled: true
+    # Checking this numeric column for outliers
     columns:
       - rating
+    # Using the interquartile range rule
     method: "iqr"
-    # IQR is the range of the middle half of ratings; 1.5 sets the outlier limit.
+    # Setting the distance beyond the middle half before a value is removed
     threshold: 1.5
