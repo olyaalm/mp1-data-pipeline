@@ -41,7 +41,7 @@ def main():
         args.output,
     )
 
-    # Validating both files before asking the loaders to open them.
+    # Checking both paths first so missing-file errors are reported before loading.
     input_valid = validate_input(args.input)
     config_valid = validate_input(args.config)
     if not input_valid or not config_valid:
@@ -53,7 +53,6 @@ def main():
     except ValueError:
         sys.exit(1)
 
-    # Validating configured fields before running the cleaning operations.
     validation = config["validation"]
     rows_before_validation = len(data)
     try:
@@ -71,7 +70,7 @@ def main():
         len(validated_data),
     )
 
-    # Building the cleaning report from processing results after validation.
+    # Starting the cleaning report after validation so validation drops stay separate.
     data_before_processing = validated_data.copy()
     try:
         cleaned_data = process_data(validated_data, config)
@@ -88,7 +87,6 @@ def main():
     save_data(cleaned_data, args.output)
     logger.info("Saved cleaned data to %s", args.output)
 
-    # Printing the report last so it remains easy to find after the log output.
     print("\nCleaning report:")
     print(report)
 

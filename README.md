@@ -1,6 +1,6 @@
 # MP1 Data Pipeline
 
-The MP1 pipeline loads CSV data and YAML settings from command-line paths, then validates and cleans the data before saving a CSV result. `src/data_loaders.py` selects a loader for CSV, JSON, or YAML files. `src/data_validator.py` checks required columns and removes rows with invalid values in configured numeric columns. `src/data_processor.py` applies duplicate removal, missing-value handling, and outlier filtering in that order. `src/data_output.py` creates the output directory and saves the cleaned DataFrame, while `src/utils.py` configures logging and validates input paths. `config/config.yaml` keeps dataset-specific columns and cleaning choices outside the Python modules. The example below processes the included sample data and writes the cleaned CSV under `output/`.
+This command-line pipeline reads a data file and a YAML config, then saves a cleaned CSV. The loader module supports CSV, JSON, and YAML files. The validator checks required columns and converts configured numeric fields, while dropping rows that contain invalid numeric text. The processor removes duplicate rows, handles missing values, and then removes outliers. The output module creates the destination folder and saves the CSV without an index. Shared logging and file checks are in `src/utils.py`, and dataset-specific settings are in `config/config.yaml`. The example uses the course sample data and shows the resulting cleaning report.
 
 ## Run the Pipeline
 

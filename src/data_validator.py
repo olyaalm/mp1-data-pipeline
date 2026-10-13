@@ -27,7 +27,7 @@ def validate_dataframe(df, required_columns, numeric_columns):
             logger.error(message)
             raise ValueError(message)
 
-        # Keeping missing values for the configured missing-data processing step.
+        # Leaving blanks as NaN so the configured missing-value step handles them.
         invalid_mask = []
         for value in validated[column]:
             invalid = False
@@ -45,11 +45,11 @@ def validate_dataframe(df, required_columns, numeric_columns):
                 invalid_count,
                 column,
             )
+            # Filtering by position keeps repeated index labels unambiguous.
             validated = validated.iloc[
                 [not invalid for invalid in invalid_mask]
             ].copy()
 
-        # Converting the surviving values to a numeric dtype for later processing.
         validated[column] = pd.to_numeric(validated[column])
 
     logger.debug(
