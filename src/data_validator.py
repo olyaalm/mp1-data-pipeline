@@ -56,7 +56,7 @@ def validate_dataframe(df, required_columns, numeric_columns):
             invalid_mask.append(invalid)
 
 
-        # Counting bad values and warning before removing their rows
+        # Counting non-numeric values and warning before removing their rows
         invalid_count = sum(invalid_mask)
         if invalid_count:
             logger.warning(
